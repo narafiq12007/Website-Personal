@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .cart-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .cart-sidebar.active {
+            transform: translateX(0);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/100c66bb-b339-485b-acc1-419165cba6b3.png" alt="Logo marketplace dengan ikon tas belanja berwarna putih" class="rounded-full">
+                <h1 class="text-xl font-bold">Digital Market</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#" class="hover:text-indigo-200 transition">Beranda</a>
+                    <a href="#" class="hover:text-indigo-200 transition">Kategori</a>
+                    <a href="#" class="hover:text-indigo-200 transition">Tentang</a>
+                    <a href="#" class="hover:text-indigo-200 transition">Kontak</a>
+                </nav>
+                <button id="cartButton" class="relative p-2 rounded-full hover:bg-indigo-700 transition">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cartCounter" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                </button>
+                <button class="md:hidden p-2 rounded-full hover:bg-indigo-700 transition">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Selamat Berbelanja di Digital Market</h2>
+            <p class="text-xl mb-8">Temukan produk terbaik dengan harga terbaik</p>
+            <div class="max-w-md mx-auto relative">
+                <input type="text" placeholder="Cari produk..." class="w-full py-3 px-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-full transition">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Produk Terpopuler</h2>
+                <div>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full transition">Lihat Semua</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="products-container">
+                <!-- Product cards will be generated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="cart-sidebar fixed top-0 right-0 w-full sm:w-96 h-full bg-white shadow-lg z-50 overflow-y-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Keranjang Belanja</h2>
+            <button id="closeCartButton" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div id="cartItems" class="space-y-4">
+            <!-- Cart items will be added here -->
+            <p class="text-center text-gray-500 py-8">Keranjang Anda masih kosong</p>
+        </div>
+
+        <div class="mt-8 border-t pt-4 hidden" id="cartSummary">
+            <div class="flex justify-between mb-2">
+                <span class="font-medium">Subtotal</span>
+                <span id="cartSubtotal">Rp0</span>
+            </div>
+            <div class="flex justify-between mb-4">
+                <span class="font-medium">Total</span>
+                <span id="cartTotal" class="font-bold text-lg">Rp0</span>
+            </div>
+            <button id="checkoutButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-full transition">
+                Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Checkout</h3>
+                <button id="closeModalButton" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="checkoutForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Alamat</label>
+                    <textarea class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" rows="3" required></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Metode Pembayaran</label>
+                    <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" required>
+                        <option value="">Pilih metode</option>
+                        <option value="bank">Transfer Bank</option>
+                        <option value="cod">Cash on Delivery</option>
+                        <option value="ewallet">E-Wallet</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-full transition">
+                    Konfirmasi Pesanan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Digital Market</h3>
+                    <p class="text-gray-400">Marketplace terlengkap dengan harga terbaik di Indonesia.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Tautan Cepat</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Beranda</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Produk</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Kategori</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Tentang Kami</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Hubungi Kami</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-envelope"></i>
+                            <span class="text-gray-400">aryanararya156@gmail.com</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-phone"></i>
+                            <span class="text-gray-400">+62 123 4567 890</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span class="text-gray-400">Depok, Indonesia</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>© 2023 Digital Market. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Products Data
+        const products = [{
+            id: 1,
+            name: "iPhone 16",
+            price: 13999000,
+            category: "Elektronik",
+            image: "iphone 16.jpg",
+            alt: "iPhone 16",
+            rating: 4.5,
+            stock: 15
+        }, {
+            id: 2,
+            name: "iPhone 13",
+            price: 8999000,
+            category: "Elektronik",
+            image: "iphone 15.jpg",
+            alt: "Iphone 13",
+            rating: 4.8,
+            stock: 8
+        }, {
+            id: 3,
+            name: "iPhone 11",
+            price: 698000,
+            category: "Elektronik",
+            image: "Iphone 11.jpg",
+            alt: "iphone 11",
+            rating: 4.3,
+            stock: 22
+        }, {
+            id: 4,
+            name: "Air Jordan 1 Mid",
+            price: 1999000,
+            category: "footwear",
+            image: "jordan.jpg",
+            alt: "Smart Watch dengan fitur pelacakan kesehatan dan tampilan AMOLED",
+            rating: 4.8,
+            stock: 12
+        }, {
+            id: 5,
+            name: "adidas-samba-trainers",
+            price: 2999000,
+            category: "footwear",
+            image: "adidas-samba-trainers.jpg",
+            alt: "didas-samba-trainers",
+            rating: 4.7,
+            stock: 5
+        }, {
+            id: 6,
+            name: "Crocs Unisex Classic Clog - Black",
+            price: 899000,
+            category: "footwear",
+            image: "crocs.jpg",
+            alt: "Crocs Unisex Classic Clog - Black",
+            rating: 4.2,
+            stock: 18
+        }, {
+            id: 7,
+            name: "14-inch MacBook Pro M4",
+            price: 27999000,
+            category: "Elektronik",
+            image: "macbook_pro_14.jpg",
+            alt: "14-inch MacBook Pro M4",
+            rating: 4.4,
+            stock: 30
+        }, {
+            id: 8,
+            name: "AirPods Pro (2nd generation) with USB-C",
+            price: 3299000,
+            category: "Elektronik",
+            image: "apple_airpods_pro.jpg",
+            alt: "SSD eksternal berkecepatan tinggi berkapasitas 1TB",
+            rating: 4.9,
+            stock: 10
+        }];
+
+        // Cart Data
+        let cart = [];
+
+        // DOM Elements
+        const productsContainer = document.getElementById('products-container');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartButton = document.getElementById('cartButton');
+        const closeCartButton = document.getElementById('closeCartButton');
+        const cartItems = document.getElementById('cartItems');
+        const cartCounter = document.getElementById('cartCounter');
+        const cartSummary = document.getElementById('cartSummary');
+        const cartSubtotal = document.getElementById('cartSubtotal');
+        const cartTotal = document.getElementById('cartTotal');
+        const checkoutButton = document.getElementById('checkoutButton');
+        const checkoutModal = document.getElementById('checkoutModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+
+        // Render Products
+        function renderProducts() {
+            productsContainer.innerHTML = '';
+            products.forEach(product => {
+                        const productEl = document.createElement('div');
+                        productEl.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300 fade-in';
+                        productEl.innerHTML = `
+                    <img src="${product.image}" alt="${product.alt}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-lg">${product.name}</h3>
+                            <span class="text-indigo-600 font-bold">Rp${product.price.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div class="flex items-center mb-2">
+                            ${renderStars(product.rating)}
+                            <span class="text-gray-500 text-sm ml-2">(${product.rating})</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">${product.category}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm ${product.stock > 5 ? 'text-green-500' : 'text-orange-500'}">
+                                ${product.stock > 5 ? 'Stok tersedia' : `Sisa ${product.stock} buah`}
+                            </span>
+                            <button onclick="addToCart(${product.id})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-full text-sm transition">
+                                + Keranjang
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productsContainer.appendChild(productEl);
+            });
+        }
+
+        // Render Stars
+        function renderStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    stars += '<i class="fas fa-star text-yellow-400"></i>';
+                } else if (i === fullStars && hasHalfStar) {
+                    stars += '<i class="fas fa-star-half-alt text-yellow-400"></i>';
+                } else {
+                    stars += '<i class="far fa-star text-yellow-400"></i>';
+                }
+            }
+            
+            return stars;
+        }
+
+        // Add to Cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                    image: product.image
+                });
+            }
+            
+            updateCart();
+            openCart();
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg';
+            notification.innerHTML = `${product.name} ditambahkan ke keranjang`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        // Update Cart
+        function updateCart() {
+            // Update cart items display
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="text-center text-gray-500 py-8">Keranjang Anda masih kosong</p>';
+                cartSummary.classList.add('hidden');
+                cartCounter.classList.add('hidden');
+                return;
+            }
+            
+            cartItems.innerHTML = '';
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                const cartItemEl = document.createElement('div');
+                cartItemEl.className = 'flex items-center p-2 bg-gray-100 rounded-lg';
+                cartItemEl.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded mr-4">
+                    <div class="flex-grow">
+                        <h4 class="font-medium">${item.name}</h4>
+                        <p class="text-sm text-gray-500">Rp${item.price.toLocaleString('id-ID')}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <button onclick="updateQuantity(${item.id}, -1)" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-2 rounded-l">
+                            -
+                        </button>
+                        <span class="bg-gray-200 px-3 py-1">${item.quantity}</span>
+                        <button onclick="updateQuantity(${item.id}, 1)" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-2 rounded-r">
+                            +
+                        </button>
+                    </div>
+                    <div class="ml-4 text-right">
+                        <p class="font-medium">Rp${itemTotal.toLocaleString('id-ID')}</p>
+                        <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 text-sm">
+                            Hapus
+                        </button>
+                    </div>
+                `;
+                cartItems.appendChild(cartItemEl);
+            });
+            
+            // Update summary
+            cartSubtotal.textContent = `Rp${subtotal.toLocaleString('id-ID')}`;
+            cartTotal.textContent = `Rp${subtotal.toLocaleString('id-ID')}`;
+            cartSummary.classList.remove('hidden');
+            
+            // Update counter
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCounter.textContent = totalItems;
+            cartCounter.classList.remove('hidden');
+        }
+
+        // Update Quantity
+        function updateQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            
+            if (item) {
+                item.quantity += change;
+                
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== productId);
+                }
+                
+                updateCart();
+            }
+        }
+
+        // Remove from Cart
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+        }
+
+        // Open Cart
+        function openCart() {
+            cartSidebar.classList.add('active');
+        }
+
+        // Close Cart
+        function closeCart() {
+            cartSidebar.classList.remove('active');
+        }
+
+        // Open Checkout Modal
+        function openCheckoutModal() {
+            checkoutModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Checkout Modal
+        function closeCheckoutModal() {
+            checkoutModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Event Listeners
+        cartButton.addEventListener('click', openCart);
+        closeCartButton.addEventListener('click', closeCart);
+        checkoutButton.addEventListener('click', openCheckoutModal);
+        closeModalButton.addEventListener('click', closeCheckoutModal);
+
+        // Close modal when clicking outside
+        checkoutModal.addEventListener('click', function(e) {
+            if (e.target === checkoutModal) {
+                closeCheckoutModal();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Terima kasih telah berbelanja! Pesanan Anda sedang diproses.');
+            cart = [];
+            updateCart();
+            closeCheckoutModal();
+            closeCart();
+        });
+
+        // Initialize
+        renderProducts();
+    </script>
+</body>
+
+</html>
+
+</html>
